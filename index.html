@@ -123,7 +123,7 @@ body{display:flex;align-items:center;justify-content:center}
   <div class="sec">
     <h3>Règles</h3>
     <div class="grid">
-      <label>Tuiles pour gagner<input type="number" inputmode="numeric" id="target"></label>
+      <label style="display:none">Tuiles pour gagner<input type="number" inputmode="numeric" id="target"></label>
       <label>Tuiles par commentaire<input type="number" inputmode="numeric" id="perComment"></label>
       <label>Likes pour 1 tuile<input type="number" inputmode="numeric" id="likesPerTile"></label>
       <label>Tuiles par pièce (cadeaux)<input type="number" inputmode="numeric" id="tilesPerCoin"></label>
@@ -149,7 +149,10 @@ body{display:flex;align-items:center;justify-content:center}
       <button type="button" data-t="g1">🎁 camp 2</button>
       <button type="button" data-t="likes">❤️ Likes</button>
       <button type="button" data-t="follow">➕ Abonné</button>
-      <button type="button" data-t="big">🍩 Gros cadeau</button>
+      <button type="button" data-t="m0">💗 100 pièces camp 1</button>
+      <button type="button" data-t="m1">🎉 100 pièces camp 2</button>
+      <button type="button" data-t="n0">🌌 Attaque camp 1</button>
+      <button type="button" data-t="n1">🎆 Attaque camp 2</button>
       <button type="button" data-t="rush">⚡ Rafale</button>
     </div>
     <p class="hint">Les tests se coupent quand ton LIVE est branché.</p>
@@ -184,18 +187,18 @@ const PREVIEW=!HOST||/claude|anthropic|usercontent|artifact/i.test(HOST)||/^(blo
 let NAME_RE=null;try{NAME_RE=new RegExp("[^\\p{L}\\p{N} '\\-]","gu");}catch(e){NAME_RE=/[^A-Za-z0-9À-ÿ '\-]/g;}
 
 /* ---------- réglages & sauvegarde ---------- */
-const DEF={teams:[{name:'ÉQUIPE 1',color:'#ff2d95',kw:'1',gift:'Rose',zoom:100,fx:50,fy:20},{name:'ÉQUIPE 2',color:'#18d9ff',kw:'2',gift:'TikTok',zoom:100,fx:50,fy:20}],target:500,perComment:1,likesPerTile:10,tilesPerCoin:10,perFollow:5,perShare:5,allComments:true,sound:true,voice:false,topMargin:13,provider:'euler',username:'taymeopascalme',apiKey:'',customUrl:'',auto:false};
+const DEF={teams:[{name:'LE PEN',color:'#ff2d95',kw:'lepen',gift:'Rose',mid:'Hand Hearts',big:'Galaxy',zoom:100,fx:50,fy:20},{name:'MÉLENCHON',color:'#18d9ff',kw:'melenchon,melanchon',gift:'TikTok',mid:'Confetti',big:'Fireworks',zoom:100,fx:50,fy:20}],target:500,endless:true,perComment:1,likesPerTile:10,tilesPerCoin:2,bigHit:5000,v:2,perFollow:5,perShare:5,allComments:true,sound:true,voice:false,topMargin:13,provider:'euler',username:'taymeopascalme',apiKey:'',customUrl:'',auto:false};
 let S=JSON.parse(JSON.stringify(DEF));
-try{const o=JSON.parse(lsGet('tb.settings')||'null');if(o&&typeof o==='object'){const tm=o.teams;Object.assign(S,o);S.teams=DEF.teams.map((d,i)=>Object.assign({},d,(Array.isArray(tm)&&tm[i])||{}));}}catch(e){}
+try{const o=JSON.parse(lsGet('tb.settings')||'null');if(o&&typeof o==='object'){const tm=o.teams;Object.assign(S,o);S.teams=DEF.teams.map((d,i)=>Object.assign({},d,(Array.isArray(tm)&&tm[i])||{}));if(o.v!==2){S.v=2;S.tilesPerCoin=DEF.tilesPerCoin;S.bigHit=DEF.bigHit;S.teams.forEach((T,i)=>{T.kw=DEF.teams[i].kw;T.gift=DEF.teams[i].gift;T.mid=DEF.teams[i].mid;T.big=DEF.teams[i].big;});}}}catch(e){}
 function saveS(){lsSet('tb.settings',JSON.stringify(S));}
 let G={counts:[0,0],wins:[0,0],round:1,contrib:[{},{}]};
 try{const o=JSON.parse(lsGet('tb.state')||'null');if(o&&Array.isArray(o.counts)&&Array.isArray(o.wins)){G=Object.assign(G,o);if(!Array.isArray(G.contrib))G.contrib=[{},{}];}}catch(e){}
 let gDirty=false;function saveG(){gDirty=true;}
 setInterval(()=>{if(gDirty){gDirty=false;lsSet('tb.state',JSON.stringify(G));}},1500);
 
-const COINS={'rose':1,'tiktok':1,'heart me':1,'gg':1,'ice cream cone':1,'finger heart':5,'doughnut':30,'hand hearts':100};
+const COINS={'rose':1,'tiktok':1,'heart me':1,'gg':1,'ice cream cone':1,'finger heart':5,'doughnut':30,'hand hearts':100,'confetti':100};
 const GIFT_IDS={'rose':5655,'tiktok':5269};
-function giftEmoji(n){n=norm(n);if(n.includes('rose'))return'🌹';if(n.includes('tiktok'))return'🎵';if(n.includes('heart'))return'💗';if(n.includes('donut')||n.includes('doughnut'))return'🍩';if(n.includes('ice cream'))return'🍦';if(n.includes('perfume'))return'🧴';if(n.includes('lion'))return'🦁';if(n.includes('galaxy'))return'🌌';if(n.includes('universe'))return'🪐';if(n==='gg')return'🎮';return'🎁';}
+function giftEmoji(n){n=norm(n);if(n.includes('rose'))return'🌹';if(n.includes('tiktok'))return'🎵';if(n.includes('heart'))return'💗';if(n.includes('donut')||n.includes('doughnut'))return'🍩';if(n.includes('ice cream'))return'🍦';if(n.includes('perfume'))return'🧴';if(n.includes('lion'))return'🦁';if(n.includes('confetti'))return'🎉';if(n.includes('galaxy'))return'🌌';if(n.includes('firework'))return'🎆';if(n.includes('universe'))return'🪐';if(n==='gg')return'🎮';return'🎁';}
 function kw0(t){return(String(S.teams[t].kw||'').split(',')[0]||'').trim()||String(t+1);}
 
 /* ---------- canvas ---------- */
@@ -232,10 +235,10 @@ function layout(){
   L.cx=[L.half*0.56,W-L.half*0.56];
   L.baseY=H*0.975;L.capLow=Math.min(H*0.8,top+H*0.42);L.capHigh=top+H*0.30;
   L.spawnY=L.headerBottom;
-  L.legendTop=top+H*0.17;L.chipW=Math.round(clamp(W*0.135,44,62));L.chipH=Math.round(clamp(H*0.054,40,58));L.chipGap=Math.round(H*0.006);
+  L.legendTop=top+H*0.17;L.chipW=Math.round(clamp(W*0.135,44,62));L.chipH=Math.round(clamp(H*0.049,36,54));L.chipGap=Math.round(H*0.006);
   buildBg();buildPhoto(0);buildPhoto(1);headerDirty=true;legendDirty=true;
 }
-function capY(n){const p=clamp(n/Math.max(1,S.target),0,1);return L.capLow+(L.capHigh-L.capLow)*p;}
+function capY(n){const p=S.endless?n/(n+Math.max(1,S.target)*0.6):clamp(n/Math.max(1,S.target),0,1);return L.capLow+(L.capHigh-L.capLow)*p;}
 function topY(t){const n=disp[t];return Math.max(L.baseY-n*L.tileH,capY(n));}
 
 function buildBg(){
@@ -350,16 +353,16 @@ function drawHeader(){
     g.font='800 '+Math.round(H*0.026)+'px '+FONT;g.shadowColor=css(c,.95);g.shadowBlur=12;g.fillStyle='#fff';
     g.fillText(trunc(String(S.teams[t].name||'').toUpperCase(),14),x,L.nameY,L.half*0.8);
     const fs=Math.round(H*0.074),maxW=Math.max(40,2*(W/2-pw/2-6-(t===0?x:W-x)));
-    g.font='900 '+fs+'px '+FONT;const txt=String(G.counts[t]);
+    g.font='900 '+fs+'px '+FONT;const txt=String(G.counts[t]).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
     g.lineWidth=Math.max(4,fs*0.1);g.strokeStyle=css(shade(c,-.35));g.shadowColor=css(c,1);g.shadowBlur=24;
     g.strokeText(txt,x,L.scoreY,maxW);g.shadowBlur=0;g.fillStyle='#fff';g.fillText(txt,x,L.scoreY,maxW);
     g.font='800 '+Math.round(H*0.019)+'px '+FONT;g.fillStyle='rgba(255,255,255,.95)';g.shadowColor='rgba(0,0,0,.7)';g.shadowBlur=6;
-    g.fillText('🏆 '+(G.wins[t]||0),x,L.winsY);g.shadowBlur=0;
+    if(!S.endless)g.fillText('🏆 '+(G.wins[t]||0),x,L.winsY);g.shadowBlur=0;
   }
   g.font='900 '+Math.round(H*0.024)+'px '+FONT;g.fillStyle='#fff';g.shadowColor='rgba(180,92,255,1)';g.shadowBlur=14;g.fillText('VS',W/2,L.nameY);g.shadowBlur=0;
   rr(g,W/2-pw/2,L.scoreY-ph/2,pw,ph,ph/2.4);g.fillStyle='rgba(8,5,16,.82)';g.fill();g.lineWidth=1.2;g.strokeStyle='rgba(255,255,255,.28)';g.stroke();
-  g.fillStyle='#fff';g.font='900 '+Math.round(H*0.0145)+'px '+FONT;g.fillText(S.target+' TUILES',W/2,L.scoreY-ph*0.18,pw-8);
-  g.font='700 '+Math.round(H*0.0118)+'px '+FONT;g.fillStyle='rgba(255,255,255,.75)';g.fillText('= 1 VICTOIRE',W/2,L.scoreY+ph*0.22,pw-8);
+  g.fillStyle='#fff';g.font='900 '+Math.round(H*0.0145)+'px '+FONT;g.fillText(S.endless?'SCORE':S.target+' TUILES',W/2,L.scoreY-ph*0.18,pw-8);
+  g.font='700 '+Math.round(H*0.0118)+'px '+FONT;g.fillStyle='rgba(255,255,255,.75)';g.fillText(S.endless?'♾️ INFINI':'= 1 VICTOIRE',W/2,L.scoreY+ph*0.22,pw-8);
   headerDirty=false;
 }
 function chips(t){
@@ -368,7 +371,8 @@ function chips(t){
   if(gname){const co=COINS[norm(gname)];out.push({e:giftEmoji(gname),a:trunc(gname,9),v:co?'+'+co*S.tilesPerCoin:'+'+S.tilesPerCoin+'/💎'});}
   out.push({e:'❤️',a:S.likesPerTile+' likes',v:'+1'});
   if(S.perFollow>0)out.push({e:'➕',a:'abonné',v:'+'+S.perFollow});
-  out.push({e:'💎',a:'1 pièce',v:'+'+S.tilesPerCoin});
+  const md=String(T.mid||'').trim();if(md)out.push({e:giftEmoji(md),a:trunc(md,9),v:'+'+100*S.tilesPerCoin});
+  const bg=String(T.big||'').trim();if(bg)out.push({e:giftEmoji(bg),a:trunc(bg,9),v:'-'+S.bigHit+' adv.'});
   return out;
 }
 function drawLegend(){
@@ -421,7 +425,7 @@ function drawPopups(){
 function drawBanners(){
   for(let t=0;t<2;t++){
     const b=banners[t];if(!b)continue;
-    const k=b.life/b.max,a=k<0.1?k/0.1:(k>0.8?1-(k-0.8)/0.2:1),x=t===0?L.half*0.5:W-L.half*0.5,y=L.headerBottom+H*0.04;
+    const k=b.life/b.max,a=k<0.1?k/0.1:(k>0.8?1-(k-0.8)/0.2:1),x=t===0?L.half*0.5:W-L.half*0.5,y=H*0.66;
     const fs=Math.round(H*0.019),fs2=Math.round(H*0.015);
     ctx.font='800 '+fs+'px '+FONT;const w1=ctx.measureText(b.text).width;ctx.font='700 '+fs2+'px '+FONT;const w2=ctx.measureText(b.sub).width;
     const bw=Math.min(L.half-10,Math.max(w1,w2)+24),bh=fs+fs2+16;
@@ -499,7 +503,7 @@ function land(d){
   floats.push({t,y:ty-L.d-tagFS()*1.2,label:d.label,plus:d.plus,lw:d.lw,pw:d.pw,life:0,max:.9});
   if(d.tiles>=10)popups.push({x:L.cx[t],y:ty-L.d*2.2,text:'+'+d.tiles,c:PAL[t].c,life:0,max:1.1,size:H*(d.tiles>=100?0.062:0.044)});
   headerDirty=true;saveG();
-  if(G.counts[t]>=S.target){G.counts[t]=S.target;win(t);}
+  if(!S.endless&&G.counts[t]>=S.target){G.counts[t]=S.target;win(t);}
 }
 function topContrib(t){let best=null;const C=G.contrib[t]||{};for(const k in C){if(!best||C[k].n>best.n)best=C[k];}return best;}
 function showWin(t,mvp){
@@ -548,7 +552,15 @@ function onSocial(u,kind){
 }
 const streaks=new Map();
 setInterval(()=>{const tn=now();for(const[k,v]of streaks)if(tn-v.at>9000)streaks.delete(k);},4000);
-function giftTeam(g){const nm=norm(g.name),id=Number(g.id);for(let t=0;t<2;t++){const want=norm(S.teams[t].gift);if(!want)continue;if(nm===want||(GIFT_IDS[want]&&GIFT_IDS[want]===id))return t;}return -1;}
+function bigTeam(g){const nm=norm(g.name);for(let t=0;t<2;t++){const w=norm(S.teams[t].big);if(w&&nm===w)return t;}return -1;}
+function nuke(from,units,u,gname){
+  const v=1-from,n=Math.max(1,units)*S.bigHit,before=G.counts[v];G.counts[v]=Math.max(0,before-n);
+  bolts.push({t:v,x0:L.cx[v]-L.half*0.2,life:0,max:.6},{t:v,x0:L.cx[v]+L.half*0.2,life:0,max:.6});flash[v]=.6;flash[from]=.3;sThunder(1);
+  banners[from]={text:giftEmoji(gname)+' '+trunc(u.name,11),sub:'−'+n+' pour '+trunc(cleanName(S.teams[v].name),9),life:0,max:3};
+  popups.push({x:L.cx[v],y:topY(v)-L.d*2.2,text:'-'+(before-G.counts[v]),c:PAL[v].c,life:0,max:1.6,size:H*0.042});
+  headerDirty=true;saveG();say(cleanName(u.name)+' envoie '+cleanName(gname)+' !');
+}
+function giftTeam(g){const nm=norm(g.name),id=Number(g.id);for(let t=0;t<2;t++){for(const f of [S.teams[t].gift,S.teams[t].mid]){const want=norm(f);if(!want)continue;if(nm===want||(GIFT_IDS[want]&&GIFT_IDS[want]===id))return t;}}return -1;}
 function onGift(u,g){
   const r=getUser(u);let units;
   if(g.streakable===false){units=g.repeat||1;}
@@ -561,6 +573,7 @@ function onGift(u,g){
   }
   if(g.end||g.streakable===false){log('🎁 '+u.name+' → '+g.name+' ×'+g.repeat);thank(u.name,g.name,g.repeat);}
   if(!(units>0))return;
+  const bt=bigTeam(g);if(bt>=0){r.team=bt;nuke(bt,units,u,g.name);return;}
   const tg=giftTeam(g);let t;
   if(tg>=0){t=tg;r.team=tg;}else t=r.team!=null?r.team:losingTeam();
   addContrib(t,units*Math.max(1,Number(g.diamonds)||1)*Math.max(1,Number(S.tilesPerCoin)||1),u,'gift',{giftName:g.name,units});
@@ -676,7 +689,7 @@ function start(){
 }
 function openSet(){$('#settings').classList.remove('hidden');$('#log').textContent=logLines.join('\n');}
 function closeSet(){$('#settings').classList.add('hidden');lastTouch=now();}
-function teamCard(t){return '<div class="team"><div class="tcap"><i id="sw'+t+'"></i>Camp '+(t+1)+'</div><div class="ph" id="ph'+t+'"></div><div class="row"><label class="btn small file">📷 Photo<input type="file" accept="image/*" id="file'+t+'"></label><button class="btn small ghost" type="button" id="rm'+t+'">Retirer</button></div><label>Zoom<input type="range" min="100" max="250" step="5" id="zoom'+t+'"></label><label>Gauche ↔ droite<input type="range" min="0" max="100" id="fx'+t+'"></label><label>Haut ↕ bas<input type="range" min="0" max="100" id="fy'+t+'"></label><label>Nom<input id="name'+t+'" maxlength="14" autocomplete="off"></label><label>Couleur<input type="color" id="color'+t+'"></label><label>Mots pour rejoindre<input id="kw'+t+'" autocomplete="off" autocapitalize="off" autocorrect="off"></label><label>Cadeau du camp<input id="gift'+t+'" autocomplete="off" autocorrect="off"></label></div>';}
+function teamCard(t){return '<div class="team"><div class="tcap"><i id="sw'+t+'"></i>Camp '+(t+1)+'</div><div class="ph" id="ph'+t+'"></div><div class="row"><label class="btn small file">📷 Photo<input type="file" accept="image/*" id="file'+t+'"></label><button class="btn small ghost" type="button" id="rm'+t+'">Retirer</button></div><label>Zoom<input type="range" min="100" max="250" step="5" id="zoom'+t+'"></label><label>Gauche ↔ droite<input type="range" min="0" max="100" id="fx'+t+'"></label><label>Haut ↕ bas<input type="range" min="0" max="100" id="fy'+t+'"></label><label>Nom<input id="name'+t+'" maxlength="14" autocomplete="off"></label><label>Couleur<input type="color" id="color'+t+'"></label><label>Mots pour rejoindre<input id="kw'+t+'" autocomplete="off" autocapitalize="off" autocorrect="off"></label><label>Cadeau du camp<input id="gift'+t+'" autocomplete="off" autocorrect="off"></label><label>Cadeau 100 pièces (+200)<input id="mid'+t+'" autocomplete="off" autocorrect="off"></label><label>Gros cadeau (retire 5000 à l\'autre)<input id="big'+t+'" autocomplete="off" autocorrect="off"></label></div>';}
 $('#teams').innerHTML=teamCard(0)+teamCard(1);
 function updateSwatches(){for(let t=0;t<2;t++){const i=$('#sw'+t);i.style.background=S.teams[t].color;i.style.color=S.teams[t].color;}}
 function updateTestLabels(){for(let t=0;t<2;t++){const g=String(S.teams[t].gift||'').trim()||'Rose';const b1=document.querySelector('[data-t="c'+t+'"]'),b2=document.querySelector('[data-t="g'+t+'"]');if(b1)b1.textContent='💬 « '+trunc(kw0(t),8)+' »';if(b2)b2.textContent=giftEmoji(g)+' '+trunc(g,9)+' (camp '+(t+1)+')';}}
@@ -689,6 +702,8 @@ for(let t=0;t<2;t++){
   bind('color'+t,()=>T.color,v=>{T.color=v;afterTeams(true);});
   bind('kw'+t,()=>T.kw,v=>{T.kw=v;afterTeams();});
   bind('gift'+t,()=>T.gift,v=>{T.gift=v;afterTeams();});
+  bind('mid'+t,()=>T.mid,v=>{T.mid=v;afterTeams();});
+  bind('big'+t,()=>T.big,v=>{T.big=v;afterTeams();});
   ['zoom','fx','fy'].forEach(k=>bind(k+t,()=>T[k],v=>{T[k]=Number(v);buildPhoto(t);saveS();}));
   $('#file'+t).addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)readPhoto(f,t);e.target.value='';});
   $('#rm'+t).addEventListener('click',()=>setPhoto(t,null));
@@ -716,7 +731,8 @@ function runTest(k){
     case'g0':case'g1':{const t=k==='g0'?0:1,u=tu(),name=String(S.teams[t].gift||'').trim()||'Rose',id=GIFT_IDS[norm(name)]||0,grp=String(Math.random()).slice(2,8);for(let i=1;i<=3;i++)setTimeout(()=>onGift(u,{id,name,diamonds:COINS[norm(name)]||1,repeat:i,end:i===3,streakable:true,group:grp}),i*230);break;}
     case'likes':for(let i=0;i<4;i++)setTimeout(()=>onLike(tu(),15),i*150);break;
     case'follow':onSocial(tu(),'follow');break;
-    case'big':onGift(tu(),{id:0,name:'Doughnut',diamonds:30,repeat:1,end:true,streakable:false,group:''});break;
+    case'm0':case'm1':{const t=k==='m0'?0:1;onGift(tu(),{id:0,name:String(S.teams[t].mid||'Hand Hearts'),diamonds:100,repeat:1,end:true,streakable:false,group:''});break;}
+    case'n0':case'n1':{const t=k==='n0'?0:1;onGift(tu(),{id:0,name:String(S.teams[t].big||'Galaxy'),diamonds:1000,repeat:1,end:true,streakable:false,group:''});break;}
     case'rush':for(let i=0;i<30;i++)setTimeout(()=>{const r=Math.random();if(r<.65)onChat(tu(),Math.random()<.5?kw0(0):kw0(1));else if(r<.9)onLike(tu(),12);else onGift(tu(),{id:5655,name:'Rose',diamonds:1,repeat:1,end:true,streakable:false,group:''});},i*110);break;
   }
 }
