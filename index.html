@@ -361,8 +361,8 @@ function drawHeader(){
   }
   g.font='900 '+Math.round(H*0.024)+'px '+FONT;g.fillStyle='#fff';g.shadowColor='rgba(180,92,255,1)';g.shadowBlur=14;g.fillText('VS',W/2,L.nameY);g.shadowBlur=0;
   rr(g,W/2-pw/2,L.scoreY-ph/2,pw,ph,ph/2.4);g.fillStyle='rgba(8,5,16,.82)';g.fill();g.lineWidth=1.2;g.strokeStyle='rgba(255,255,255,.28)';g.stroke();
-  g.fillStyle='#fff';g.font='900 '+Math.round(H*0.0145)+'px '+FONT;g.fillText(S.endless?'SCORE':S.target+' TUILES',W/2,L.scoreY-ph*0.18,pw-8);
-  g.font='700 '+Math.round(H*0.0118)+'px '+FONT;g.fillStyle='rgba(255,255,255,.75)';g.fillText(S.endless?'♾️ INFINI':'= 1 VICTOIRE',W/2,L.scoreY+ph*0.22,pw-8);
+  g.fillStyle='#fff';g.font='900 '+Math.round(H*0.0145)+'px '+FONT;g.fillText(S.endless?'SCORE':S.target+' TUILES',W/2,S.endless?L.scoreY:L.scoreY-ph*0.18,pw-8);
+  g.font='700 '+Math.round(H*0.0118)+'px '+FONT;g.fillStyle='rgba(255,255,255,.75)';if(!S.endless)g.fillText('= 1 VICTOIRE',W/2,L.scoreY+ph*0.22,pw-8);
   headerDirty=false;
 }
 function chips(t){
