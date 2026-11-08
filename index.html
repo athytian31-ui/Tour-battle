@@ -187,9 +187,9 @@ const PREVIEW=!HOST||/claude|anthropic|usercontent|artifact/i.test(HOST)||/^(blo
 let NAME_RE=null;try{NAME_RE=new RegExp("[^\\p{L}\\p{N} '\\-]","gu");}catch(e){NAME_RE=/[^A-Za-z0-9À-ÿ '\-]/g;}
 
 /* ---------- réglages & sauvegarde ---------- */
-const DEF={teams:[{name:'LE PEN',color:'#ff2d95',kw:'lepen',gift:'Rose',mid:'Hand Hearts',big:'Galaxy',zoom:100,fx:50,fy:20},{name:'MÉLENCHON',color:'#18d9ff',kw:'melenchon,melanchon',gift:'TikTok',mid:'Confetti',big:'Fireworks',zoom:100,fx:50,fy:20}],target:500,endless:true,perComment:1,likesPerTile:10,tilesPerCoin:2,bigHit:5000,v:2,perFollow:5,perShare:5,allComments:true,sound:true,voice:false,topMargin:13,provider:'euler',username:'taymeopascalme',apiKey:'',customUrl:'',auto:false};
+const DEF={teams:[{name:'LE PEN',color:'#ff2d95',kw:'rn',gift:'Rose',mid:'Hand Hearts',big:'Galaxy',zoom:100,fx:50,fy:20},{name:'MÉLENCHON',color:'#18d9ff',kw:'lfi',gift:'TikTok',mid:'Confetti',big:'Fireworks',zoom:100,fx:50,fy:20}],target:500,endless:true,perComment:1,likesPerTile:10,tilesPerCoin:2,bigHit:5000,v:3,perFollow:5,perShare:5,allComments:true,sound:true,voice:false,topMargin:13,provider:'euler',username:'taymeopascalme',apiKey:'',customUrl:'',auto:false};
 let S=JSON.parse(JSON.stringify(DEF));
-try{const o=JSON.parse(lsGet('tb.settings')||'null');if(o&&typeof o==='object'){const tm=o.teams;Object.assign(S,o);S.teams=DEF.teams.map((d,i)=>Object.assign({},d,(Array.isArray(tm)&&tm[i])||{}));if(o.v!==2){S.v=2;S.tilesPerCoin=DEF.tilesPerCoin;S.bigHit=DEF.bigHit;S.teams.forEach((T,i)=>{T.kw=DEF.teams[i].kw;T.gift=DEF.teams[i].gift;T.mid=DEF.teams[i].mid;T.big=DEF.teams[i].big;});}}}catch(e){}
+try{const o=JSON.parse(lsGet('tb.settings')||'null');if(o&&typeof o==='object'){const tm=o.teams;Object.assign(S,o);S.teams=DEF.teams.map((d,i)=>Object.assign({},d,(Array.isArray(tm)&&tm[i])||{}));const ov=Number(o.v)||0;if(ov<2){S.tilesPerCoin=DEF.tilesPerCoin;S.bigHit=DEF.bigHit;S.teams.forEach((T,i)=>{T.gift=DEF.teams[i].gift;T.mid=DEF.teams[i].mid;T.big=DEF.teams[i].big;});}if(ov<3){S.teams.forEach((T,i)=>{T.kw=DEF.teams[i].kw;});}S.v=3;}}catch(e){}
 function saveS(){lsSet('tb.settings',JSON.stringify(S));}
 let G={counts:[0,0],wins:[0,0],round:1,contrib:[{},{}]};
 try{const o=JSON.parse(lsGet('tb.state')||'null');if(o&&Array.isArray(o.counts)&&Array.isArray(o.wins)){G=Object.assign(G,o);if(!Array.isArray(G.contrib))G.contrib=[{},{}];}}catch(e){}
@@ -366,7 +366,7 @@ function drawHeader(){
   headerDirty=false;
 }
 function chips(t){
-  const T=S.teams[t],out=[{e:'💬',a:'« '+trunc(kw0(t),7)+' »',v:'+'+S.perComment}];
+  const T=S.teams[t],out=[{e:'💬',a:'« '+trunc(kw0(t),7).toUpperCase()+' »',v:'+'+S.perComment}];
   const gname=String(T.gift||'').trim();
   if(gname){const co=COINS[norm(gname)];out.push({e:giftEmoji(gname),a:trunc(gname,9),v:co?'+'+co*S.tilesPerCoin:'+'+S.tilesPerCoin+'/💎'});}
   out.push({e:'❤️',a:S.likesPerTile+' likes',v:'+1'});
